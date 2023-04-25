@@ -18,14 +18,14 @@ namespace src.WilliamTell
     public class WilliamLogger
     {
         /* Static fields */
-        public readonly static Encoding globalEnc = Encoding.Unicode;
-        public readonly static string WILLIAM_LOG_DECORATION = ">>> ";
-        public readonly static string WILLIAM_SIGN = "William";
-        public readonly static string DEAFULT_WILLIAM_PURPOSE = WPurpose.LOGGING;
+        public  readonly static Encoding globalEnc = Encoding.Unicode;
+        public  readonly static string WILLIAM_LOG_DECORATION = ">>> ";
+        public  readonly static string WILLIAM_SIGN = "William";
+        public  readonly static string DEAFULT_WILLIAM_PURPOSE = WPurpose.LOGGING;
         private readonly static string DEFAULT_LOG_FILE_NAME_ALONE = "UntitledLog";
         private readonly static string DEFAULT_LOG_FILE_PATH = $"C:\\Users\\{Environment.UserName}\\Documents\\WilliamNTFSLog.wlog";
         private static WilliamLogger globalWilliamLogger
-            = new(WilliamLogger.WPriority.NONE, WilliamLogger.WPurpose.NOTHING);
+            = new WilliamLogger(WilliamLogger.WPriority.NONE, WilliamLogger.WPurpose.NOTHING);
 
         private readonly static bool[] FILE_STREAM_ACCESS_PERMISSION_RESTRICTION_ALL
             = new bool[] { true, true, true };
@@ -84,16 +84,16 @@ namespace src.WilliamTell
 
         public class WPriority
         {
-            public static readonly object[] NONE = { "NONE", int.MinValue };
-            public static readonly object[] MINOR = { "MINOR", 10000 };
-            public static readonly object[] NORMAL = { "NORMAL", 20000 };
-            public static readonly object[] MAJOR = { "MAJOR", 30000 };
-            public static readonly object[] SERIOUS = { "SERIOUS", 40000 };
-            public static readonly object[] DANDEROUS = { "DANDEROUS", 50000 };
-            public static readonly object[] FATAL = { "FATAL", 60000 };
-            public static readonly object[] DEBUG = { "DEBUG", 70000 };
-            public static readonly object[] ALL = { "ALL", int.MaxValue };
-            public static readonly object[] DEFAULT = NONE;
+            public static readonly object[] NONE        = { "NONE"        , int.MinValue };
+            public static readonly object[] MINOR       = { "MINOR"       , 10000        };
+            public static readonly object[] NORMAL      = { "NORMAL"      , 20000        };
+            public static readonly object[] MAJOR       = { "MAJOR"       , 30000        };
+            public static readonly object[] SERIOUS     = { "SERIOUS"     , 40000        };
+            public static readonly object[] DANDEROUS   = { "DANDEROUS"   , 50000        };
+            public static readonly object[] FATAL       = { "FATAL"       , 60000        };
+            public static readonly object[] DEBUG       = { "DEBUG"       , 70000        };
+            public static readonly object[] ALL         = { "ALL"         , int.MaxValue };
+            public static readonly object[] DEFAULT     = NONE;
 
             private WPriority() { }
 
@@ -106,7 +106,7 @@ namespace src.WilliamTell
             ///          1 For CURRENT is greater than OTHER;
             ///          0 For CURRENT is equal as OTHER;
             ///         -1 For CURRENT is less than OTHER; </returns>
-            public static int Compare(object[]? current, object[]? other)
+            public static int Compare(object[] current, object[] other)
             {
                 if (current == null || other == null)
                     return 2;
@@ -331,59 +331,65 @@ namespace src.WilliamTell
         public string Purpose { get { return mPurpose; } }
 
 
-        /* 00 func Log: (object[]? info)                                                                                         // Uses @info, Priority.DEFAULT, Purpose.DEFAULT, stderr, Exception, false
-         * 01 func Log: (object[]? info, object[] priority, string purpose)                                                      // Uses @info, @priority, @purpose, stderr, Exception, false
-         * 02 func Log: (object[]? info, object[] priority, string purpose, string[]? redirections)                              // Uses @info, @priority, @purpose, @redirections, Exception, false
-         * 03 func Log: (object[]? info, object[] priority, string purpose, string[]? redirections, bool redirectionsOnly)       // Uses @info, @priority, @purpose, @redirections, Exception, @redirectionsOnly
-         * 03 func Log: (object[]? info, object[] priority, string purpose, Exception innerException)                            // Uses @info, @priority, @purpose, stderr, @innerException, false
-         * 04 func Log: (object[]? info, object[] priority, string purpose, string[]? redirections, Exception innerException)    // Uses @info, @priority, @purpose, @redirections, @innerException, false
-         * 05 func Log: (object[]? info, object[] priority, string purpose, string[]? redirections, Exception innerException,    // Uses @info, @priority, @purpose, @redirections, @innerException, @redirectionsOnly
+        /* 00 func Log: (object[] info)                                                                                         // Uses @info, Priority.DEFAULT, Purpose.DEFAULT, stderr, Exception, false
+         * 01 func Log: (object[] info, object[] priority, string purpose)                                                      // Uses @info, @priority, @purpose, stderr, Exception, false
+         * 02 func Log: (object[] info, object[] priority, string purpose, string[]? redirections)                              // Uses @info, @priority, @purpose, @redirections, Exception, false
+         * 03 func Log: (object[] info, object[] priority, string purpose, string[]? redirections, bool redirectionsOnly)       // Uses @info, @priority, @purpose, @redirections, Exception, @redirectionsOnly
+         * 03 func Log: (object[] info, object[] priority, string purpose, Exception innerException)                            // Uses @info, @priority, @purpose, stderr, @innerException, false
+         * 04 func Log: (object[] info, object[] priority, string purpose, string[]? redirections, Exception innerException)    // Uses @info, @priority, @purpose, @redirections, @innerException, false
+         * 05 func Log: (object[] info, object[] priority, string purpose, string[]? redirections, Exception innerException,    // Uses @info, @priority, @purpose, @redirections, @innerException, @redirectionsOnly
          * ........................................................................................ bool redirectionsOnly)
-         * 06 func Log: (object[]? info, WilliamLogger logger)                                                                   // Uses @info, @logger.mPriority, @logger.mPurpose, stderr, Exception, false
-         * 07 func Log: (object[]? info, WilliamLogger logger, string[]? redirections)                                           // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, Exception, false
-         * 08 func Log: (object[]? info, WilliamLogger logger, string[]? redirections, bool redirectionsOnly)                    // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, Exception, @redirectionsOnly
-         * 09 func Log: (object[]? info, WilliamLogger logger, Exception innerException)                                         // Uses @info, @logger.mPriority, @logger.mPurpose, stderr, @innerException, false
-         * 0A func Log: (object[]? info, WilliamLogger logger, string[]? redirections, Exception innerException)                 // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, @innerException, false
-         * 0B func Log: (object[]? info, WilliamLogger logger, string[]? redirections, Exception innerException,                 // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, @innerException, @redirectionsOnly
+         * 06 func Log: (object[] info, WilliamLogger logger)                                                                   // Uses @info, @logger.mPriority, @logger.mPurpose, stderr, Exception, false
+         * 07 func Log: (object[] info, WilliamLogger logger, string[]? redirections)                                           // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, Exception, false
+         * 08 func Log: (object[] info, WilliamLogger logger, string[]? redirections, bool redirectionsOnly)                    // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, Exception, @redirectionsOnly
+         * 09 func Log: (object[] info, WilliamLogger logger, Exception innerException)                                         // Uses @info, @logger.mPriority, @logger.mPurpose, stderr, @innerException, false
+         * 0A func Log: (object[] info, WilliamLogger logger, string[]? redirections, Exception innerException)                 // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, @innerException, false
+         * 0B func Log: (object[] info, WilliamLogger logger, string[]? redirections, Exception innerException,                 // Uses @info, @logger.mPriority, @logger.mPurpose, @redirections, @innerException, @redirectionsOnly
          * ........................................................................... bool redirectionsOnly)
          */
 
-        public void Log(object[]? info)
+        public void Log(object[] info)
         {
             Log(info, WPriority.DEFAULT, WPurpose.DEFAULT, null, false);
         }
-        public void Log(object[]? info, object[] priority, string purpose)
+        public void Log(object[] info, object[] priority, string purpose)
         {
             Log(info, priority, purpose, null, false);
         }
-        public void Log(object[]? info, object[] priority, string purpose, string[]? redirections)
+        public void Log(object[] info, object[] priority, string purpose, string[] redirections)
         {
             Log(info, priority, purpose, redirections, false);
         }
         /* ! */
-        public void Log(object[]? info, object[] priority, string purpose, string[]? redirections, bool redirectionsOnly)
+        public void Log(object[] info, object[] priority, string purpose, string[] redirections, bool redirectionsOnly)
         {
             /* Null check */
-            info ??= new object[] { "" }; // YOU LEFT HERE
-            redirections ??= new string[] { DEFAULT_LOG_FILE_PATH + DEFAULT_LOG_FILE_NAME_ALONE }; // HERE
+            if (info is null)
+            {
+                info = new object[] { "" };
+            }
+            if (redirections is null)
+            {
+                redirections = new string[] { DEFAULT_LOG_FILE_PATH + DEFAULT_LOG_FILE_NAME_ALONE };
+            }
 
             string result = GenerateLogContent(GenerateWilliamPrecontent(priority, purpose), info);
 
             for (int i = 0; i < redirections.Length; i++)
             {
-                // TODO: HERE
+                // YOU LEFT HERE
             }
         }
-        public void Log(object[]? info, object[] priority, string purpose, Exception innerException) { }
-        public void Log(object[]? info, object[] priority, string purpose, string[]? redirections, Exception innerException) { }
-        public void Log(object[]? info, object[] priority, string purpose, string[]? redirections, Exception innerException, bool redirectionsOnly) { }
-        public void Log(object[]? info, WilliamLogger logger) { }
-        public void Log(object[]? info, WilliamLogger logger, string[]? redirections) { }
+        public void Log(object[] info, object[] priority, string purpose, Exception innerException) { }
+        public void Log(object[] info, object[] priority, string purpose, string[] redirections, Exception innerException) { }
+        public void Log(object[] info, object[] priority, string purpose, string[] redirections, Exception innerException, bool redirectionsOnly) { }
+        public void Log(object[] info, WilliamLogger logger) { }
+        public void Log(object[] info, WilliamLogger logger, string[] redirections) { }
         /* ! */
-        public void Log(object[]? info, WilliamLogger logger, string[]? redirections, bool redirectionsOnly) { }
-        public void Log(object[]? info, WilliamLogger logger, Exception innerException) { }
-        public void Log(object[]? info, WilliamLogger logger, string[]? redirections, Exception innerException) { }
-        public void Log(object[]? info, WilliamLogger logger, string[]? redirections, Exception innerException, bool redirectionsOnly) { }
+        public void Log(object[] info, WilliamLogger logger, string[] redirections, bool redirectionsOnly) { }
+        public void Log(object[] info, WilliamLogger logger, Exception innerException) { }
+        public void Log(object[] info, WilliamLogger logger, string[] redirections, Exception innerException) { }
+        public void Log(object[] info, WilliamLogger logger, string[] redirections, Exception innerException, bool redirectionsOnly) { }
 
         /// <summary>
         /// Make sure every line for outputing is covered with WilliamPrecontent ahead.
@@ -538,11 +544,11 @@ namespace src.WilliamTell
         /// <exception cref="ArgumentException">Thrown once target indexed object is not Stream nor sub-Stream.</exception>
         private void LogToVariantStreams(WilliamLogger wLogger, string[] streams)
         {
-            CheckRedirectionsPermissions(streams, FILE_STREAM_ACCESS_PERMISSION_RESTRICTIONS_ALL);
+            CheckRedirectionsPermissions(streams, FILE_STREAM_ACCESS_PERMISSION_RESTRICTIONS_ALL); // HERE: Issued
 
             for (int i = 0; i < streams.Length; i++)
             {
-                if (streams[i] is not null)
+                if (streams[i] is null)
                 {
                     throw new ArgumentNullException();
                 }
@@ -554,7 +560,7 @@ namespace src.WilliamTell
                 }
                 catch (IOException ioe)
                 {
-                    // TODO: HERE
+                    // TODO: Completing actions after catching IOException.
                 }
             }
         }
@@ -686,7 +692,7 @@ namespace src.WilliamTell
         {
             int len = array.Length;
 
-            /* Create a new array<byte> object */
+            /* Create a new Array<byte> object */
             byte[] newArray = new byte[len + 1];
             /* Copy elements from original array */
             for (int i = 0; i < len; i++)
@@ -702,24 +708,12 @@ namespace src.WilliamTell
         {
             int lenA = A.Length;
             int lenB = B.Length;
-            int lenRtn = (lenA >= lenB ? lenA : lenB);
+            int lenRtn = Math.Max(lenA, lenB);
 
-            /* Instant a returner { */
-            bool[][] rtn = new bool[lenRtn][] { FILE_STREAM_ACCESS_PERMISSION_RESTRICTION_NONE };
-
-            /* Apply lengths */
-            for (int i = 0; i < lenRtn; i++)
-            {
-                /* For those 3(HARD CODED) perms */
-                for (int j = 0; j < 3 /* HARD CODED: 3 */; j++)
-                {
-                    rtn[i][j] = false;
-                }
-            }
-            /* } Instant a returner */
+            bool[][] rtn = new bool[][] { FILE_STREAM_ACCESS_PERMISSION_RESTRICTION_NONE };
 
             for (int i = 0; i < lenA; i++)
-                for (int j = 0; j < A[0].Length /* HARD CODED: 3 */; j++)
+                for (int j = 0; j < A[0].Length; j++)
                     rtn[i][j] = (A[i][j] || B[i][j]);
             return rtn;
         }
